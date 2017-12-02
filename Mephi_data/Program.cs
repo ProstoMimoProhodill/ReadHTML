@@ -42,10 +42,26 @@ namespace Mephi_data
 
             using (StreamReader sr = new StreamReader(resp.GetResponseStream(), Encoding.GetEncoding("utf-8"))) html = sr.ReadToEnd();
             html = html.Trim();
-            File.WriteAllText(path, html + Environment.NewLine);
+            //File.WriteAllText(path, html + Environment.NewLine);
 
 
-            File.WriteAllText(data, "");
+            //string[] arr = new string[0];
+            //arr[0] = html;
+
+            //Console.WriteLine(arr[0]);
+
+            //упорядочить хтмл по строкам
+
+            html = normalizeHTML(html);
+
+            Console.Read();//
+            return;//
+
+
+            //поиск подстроки в строке 
+
+
+            //File.WriteAllText(data, "");
             foreach (string line in File.ReadLines(path))
             {
                 if (line.Contains("Расписание занятий группы"))
@@ -59,6 +75,12 @@ namespace Mephi_data
                 {
                     string textData = getTextFromHTML(line);
                     Console.WriteLine(textData);
+
+                    if (line.Contains("tutors"))
+                    {
+                        Console.WriteLine("<-------------------------->");
+                    }
+
                     //File.AppendAllText(data, textData + Environment.NewLine);
                     //Console.WriteLine(line);
                 }
@@ -67,6 +89,88 @@ namespace Mephi_data
             Console.Read();
         }
 
+
+
+        static public string normalizeHTML(string html)
+        {
+            int flag = 0;
+            int count = 0;
+            string str = "";
+
+            string[] text = new string[55000];
+
+            for (int i = 0; i<html.Length-3;i++)
+            //for (int i = 0; i < 31000; i++)
+            {
+                str = str + html[i];
+
+                if ((html[i] == '<')&&(flag==0))
+                {
+                    flag = 1;  
+                }
+
+                
+                if((html[i+1] == '<') && (html[i+2] == '/')){
+                    if ((str != "") || (str != " "))
+                    {
+                        text[count] = str.Trim();
+                        str = "";
+                        count++;
+                    }
+                }
+                
+
+                if ((html[i] == '>') && (flag != 0))
+                {
+                    if ((str!="")||(str!=" "))
+                    {
+                        text[count] = str.Trim();
+                        str = "";
+                        count++;
+                    }
+                    flag = 0;
+                }
+            }
+
+            Console.Clear();
+            File.WriteAllText(@"D:\data.txt", "");
+
+            string[] dataFromHTML = new string[count];
+            int countNewText = 0;
+
+            for (int i=0; i<count;i++)
+            {
+                //Console.WriteLine(i+"   "+text[i]);
+                //File.AppendAllText(@"D:\data.txt", text[i]+ Environment.NewLine);
+                flag = 1;
+                text[i] = text[i].Trim();
+                for (int k = 0; k < text[i].Length; k++)
+                {
+                    if ((text[i][k] == '<')||(text[i][k] == '>')||(text[i][k] == ';'))
+                    {
+                        flag = 0;
+                        break;
+                    }
+                }
+
+                if((flag == 1)&&(text[i]!="")&&(text[i] != " "))
+                {
+                    dataFromHTML[countNewText] = text[i];
+                    countNewText++;
+                }
+
+            }
+
+
+            for(int i = 0; i < countNewText; i++)
+            {
+                File.AppendAllText(@"D:\data.txt", dataFromHTML[i] + Environment.NewLine);
+                Console.WriteLine(dataFromHTML[i]);
+            }
+
+            Console.WriteLine("End");
+            return html;
+        }
 
 
         static public string getTextFromHTML(string html)
