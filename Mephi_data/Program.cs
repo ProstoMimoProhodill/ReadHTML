@@ -14,10 +14,8 @@ namespace Mephi_data
         static void Main(string[] args)
         {
             string URL = "https://home.mephi.ru/study_groups/2873/schedule";
-            string path = @"D:\text.txt";
-            string data = @"D:\data.txt";
             string html = "";
-
+            string[] data;
 
             if (CheckNet.CheckURL(URL))
             {
@@ -36,54 +34,15 @@ namespace Mephi_data
             proxy_request.ContentType = "application/x-www-form-urlencoded";
             proxy_request.UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/532.5 (KHTML, like Gecko) Chrome/4.0.249.89 Safari/532.5";
             proxy_request.KeepAlive = true;
-
-
             HttpWebResponse resp = proxy_request.GetResponse() as HttpWebResponse;
-
             using (StreamReader sr = new StreamReader(resp.GetResponseStream(), Encoding.GetEncoding("utf-8"))) html = sr.ReadToEnd();
             html = html.Trim();
-            //File.WriteAllText(path, html + Environment.NewLine);
 
+            data = getTextFromHTML(html);
 
-            //string[] arr = new string[0];
-            //arr[0] = html;
-
-            //Console.WriteLine(arr[0]);
-
-            //упорядочить хтмл по строкам
-
-            html = normalizeHTML(html);
-
-            Console.Read();//
-            return;//
-
-
-            //поиск подстроки в строке 
-
-
-            //File.WriteAllText(data, "");
-            foreach (string line in File.ReadLines(path))
+            for (int i = 0;i<data.Count();i++)
             {
-                if (line.Contains("Расписание занятий группы"))
-                {
-                    string title = getTextFromHTML(line);
-                    Console.WriteLine(title); 
-                }
-
-
-                if (line.Contains("tutors")|| line.Contains("label label-default label-lesson")|| line.Contains("lesson-time") || line.Contains("rooms"))
-                {
-                    string textData = getTextFromHTML(line);
-                    Console.WriteLine(textData);
-
-                    if (line.Contains("tutors"))
-                    {
-                        Console.WriteLine("<-------------------------->");
-                    }
-
-                    //File.AppendAllText(data, textData + Environment.NewLine);
-                    //Console.WriteLine(line);
-                }
+                Console.WriteLine(data[i]);
             }
 
             Console.Read();
@@ -91,16 +50,14 @@ namespace Mephi_data
 
 
 
-        static public string normalizeHTML(string html)
+        static public string[] getTextFromHTML(string html)
         {
             int flag = 0;
             int count = 0;
             string str = "";
-
-            string[] text = new string[55000];
+            string[] text = new string[100000];
 
             for (int i = 0; i<html.Length-3;i++)
-            //for (int i = 0; i < 31000; i++)
             {
                 str = str + html[i];
 
@@ -132,19 +89,15 @@ namespace Mephi_data
                 }
             }
 
-            Console.Clear();
-            File.WriteAllText(@"D:\data.txt", "");
-
             string[] dataFromHTML = new string[count];
             int countNewText = 0;
 
             for (int i=0; i<count;i++)
             {
-                //Console.WriteLine(i+"   "+text[i]);
-                //File.AppendAllText(@"D:\data.txt", text[i]+ Environment.NewLine);
                 flag = 1;
                 text[i] = text[i].Trim();
-                for (int k = 0; k < text[i].Length; k++)
+
+                for (int k = 0; k < (text[i].Length)/3; k++)
                 {
                     if ((text[i][k] == '<')||(text[i][k] == '>')||(text[i][k] == ';'))
                     {
@@ -161,31 +114,27 @@ namespace Mephi_data
 
             }
 
-
+            string[] data = new string[countNewText];
             for(int i = 0; i < countNewText; i++)
             {
-                File.AppendAllText(@"D:\data.txt", dataFromHTML[i] + Environment.NewLine);
-                Console.WriteLine(dataFromHTML[i]);
-            }
+                flag = 1;
+                for(int q = 0;q < dataFromHTML[i].Length; q++)
+                {             
+                    if (dataFromHTML[i][q] == '<')
+                    {
+                        flag = 0;
+                        data[i] = dataFromHTML[i].Substring(0, q).Trim();
+                        break;
+                    }             
+                }
 
-            Console.WriteLine("End");
-            return html;
-        }
-
-
-        static public string getTextFromHTML(string html)
-        {
-            for (int i=0;i<html.Length;i++)
-            {
-                if ((html[i] == '<')||(html[i] == '>')||(html[i] == '/'))
+                if (flag == 1)
                 {
-                    int index1 = html.IndexOf(">");
-                    int index2 = html.IndexOf("</");
-                    return html.Substring(index1 + 1, index2 - index1 - 1);
+                    data[i] = dataFromHTML[i];
                 }
             }
 
-            return "";
+            return data;
         }
 
     }
