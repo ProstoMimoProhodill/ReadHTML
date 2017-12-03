@@ -23,7 +23,7 @@ namespace Mephi_data
             }
             else
             {
-                Console.WriteLine("Error");
+                Console.WriteLine("Error: does not exist");
                 Console.Read();
                 return;
             }
@@ -38,16 +38,128 @@ namespace Mephi_data
             using (StreamReader sr = new StreamReader(resp.GetResponseStream(), Encoding.GetEncoding("utf-8"))) html = sr.ReadToEnd();
             html = html.Trim();
 
-            data = getTextFromHTML(html);
+            //
+            Console.WriteLine("Input day, pls ");
+            string day = Console.ReadLine();
+            //
 
-            for (int i = 0;i<data.Count();i++)
-            {
-                Console.WriteLine(data[i]);
-            }
+            Console.Clear();
+
+            data = getTextFromHTML(html);
+            data = correctionData(data,day);
 
             Console.Read();
         }
 
+
+        static public string[] correctionData(string[] data,string day)
+        {
+            string flag = "";
+            int count = 0;
+
+            List<string> monday = new List<string>();
+            List<string> tuesday = new List<string>();
+            List<string> wednesday = new List<string>();
+            List<string> thursday = new List<string>();
+            List<string> friday = new List<string>();
+            List<string> saturday = new List<string>();
+
+            for (int i = 0; i<data.Count()-2;i++)
+            {
+                switch (data[i])
+                {
+                    case ("Понедельник"):
+                        flag = "Понедельник";
+                        break;
+                    case ("Вторник"):
+                        flag = "Вторник";
+                        break;
+                    case ("Среда"):
+                        flag = "Среда";
+                        break;
+                    case ("Четверг"):
+                        flag = "Четверг";
+                        break;
+                    case ("Пятница"):
+                        flag = "Пятница";
+                        break;
+                    case ("Суббота"):
+                        flag = "Суббота";
+                        break;
+                }
+
+                switch (flag)
+                {
+                    case ("Понедельник"):
+                        monday.Add(data[i]);
+                        count++;
+                        break;
+                    case ("Вторник"):
+                        thursday.Add(data[i]);
+                        count++;
+                        break;
+                    case ("Среда"):
+                        wednesday.Add(data[i]);
+                        count++;
+                        break;
+                    case ("Четверг"):
+                        thursday.Add(data[i]);
+                        count++;
+                        break;
+                    case ("Пятница"):
+                        friday.Add(data[i]);
+                        count++;
+                        break;
+                    case ("Суббота"):
+                        saturday.Add(data[i]);
+                        count++;
+                        break;
+                }
+            }
+
+
+            switch (day)
+            {
+                case ("monday"):
+                    foreach (string p in monday)
+                    {
+                        Console.WriteLine(p);
+                    }
+                    break;
+                case ("tuesday"):
+                    foreach (string p in tuesday)
+                    {
+                        Console.WriteLine(p);
+                    }
+                    break;
+                case ("wednesday"):
+                    foreach (string p in wednesday)
+                    {
+                        Console.WriteLine(p);
+                    }
+                    break;
+                case ("thursday"):
+                    foreach (string p in thursday)
+                    {
+                        Console.WriteLine(p);
+                    }
+                    break;
+                case ("friday"):
+                    foreach (string p in friday)
+                    {
+                        Console.WriteLine(p);
+                    }
+                    break;
+                case ("saturday"):
+                    foreach (string p in saturday)
+                    {
+                        Console.WriteLine(p);
+                    }
+                    break;
+            }
+
+            return data;
+        }
 
 
         static public string[] getTextFromHTML(string html)
