@@ -11,37 +11,23 @@ namespace Mephi_data
 {
     class Program
     {
+        //static private string URL = "https://home.mephi.ru/study_groups/2873/schedule";
+        static private string URL = "https://home.mephi.ru/study_groups/";
+        static private string html = "";
+        static string group = "";
+
+
         static void Main(string[] args)
-        {
-            string URL = "https://home.mephi.ru/study_groups/2873/schedule";
-            string html = "";
+        {            
             string[] data;
 
-            if (CheckNet.CheckURL(URL))
-            {
-                Console.WriteLine("Ok");
-            }
-            else
-            {
-                Console.WriteLine("Error: does not exist");
-                Console.Read();
-                return;
-            }
- 
+            Console.WriteLine("Input group, pls ");
+            group = Console.ReadLine();
 
-            HttpWebRequest proxy_request = (HttpWebRequest)WebRequest.Create(URL);
-            proxy_request.Method = "GET";
-            proxy_request.ContentType = "application/x-www-form-urlencoded";
-            proxy_request.UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/532.5 (KHTML, like Gecko) Chrome/4.0.249.89 Safari/532.5";
-            proxy_request.KeepAlive = true;
-            HttpWebResponse resp = proxy_request.GetResponse() as HttpWebResponse;
-            using (StreamReader sr = new StreamReader(resp.GetResponseStream(), Encoding.GetEncoding("utf-8"))) html = sr.ReadToEnd();
-            html = html.Trim();
+            html = init();
 
-            //
             Console.WriteLine("Input day, pls ");
             string day = Console.ReadLine();
-            //
 
             Console.Clear();
 
@@ -50,6 +36,99 @@ namespace Mephi_data
 
             Console.Read();
         }
+
+
+        static public string init()
+        {
+            string result = "";
+            URL = "https://home.mephi.ru/study_groups";
+
+            HttpWebRequest proxy_request = (HttpWebRequest)WebRequest.Create(URL);
+            proxy_request.Method = "GET";
+            proxy_request.ContentType = "application/x-www-form-urlencoded";
+            proxy_request.UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/532.5 (KHTML, like Gecko) Chrome/4.0.249.89 Safari/532.5";
+            proxy_request.KeepAlive = true;
+            HttpWebResponse resp = proxy_request.GetResponse() as HttpWebResponse;
+            using (StreamReader sr = new StreamReader(resp.GetResponseStream(), Encoding.GetEncoding("utf-8"))) html = sr.ReadToEnd();
+
+            result = getTitle(html.Trim());
+
+            File.WriteAllText(@"E:\data.txt",result);
+
+            /*
+            for (int i = 550; i < 3000; i++)
+            {
+                if (CheckNet.CheckURL(URL + i + "/schedule"))
+                {
+                    HttpWebRequest proxy_request = (HttpWebRequest)WebRequest.Create(URL);
+                    proxy_request.Method = "GET";
+                    proxy_request.ContentType = "application/x-www-form-urlencoded";
+                    proxy_request.UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/532.5 (KHTML, like Gecko) Chrome/4.0.249.89 Safari/532.5";
+                    proxy_request.KeepAlive = true;
+                    HttpWebResponse resp = proxy_request.GetResponse() as HttpWebResponse;
+                    using (StreamReader sr = new StreamReader(resp.GetResponseStream(), Encoding.GetEncoding("utf-8"))) html = sr.ReadToEnd();
+
+                    result = getTitle(html.Trim(), i);
+
+                    if (result == group)
+                    {
+                        Console.WriteLine("Group found!");
+                        return html.Trim();
+                    }
+
+                    Console.WriteLine("Other group");
+
+                }
+                else
+                {
+                    Console.WriteLine(i+" Error: does not exist");
+                }
+            }
+            */
+            return "";
+        }
+
+        static public string getTitle(string htmlTitle)
+        {
+            string str1 = "<div class='list-group'>";
+
+            int len = htmlTitle.Length;
+     
+            string str2 = "</a></div>";
+            string result = "";
+
+            //Console.WriteLine(htmlTitle);
+            //Console.Read();
+
+            int index1 = htmlTitle.IndexOf(str1);
+
+            htmlTitle = htmlTitle.Substring(index1);
+
+            int index2 = htmlTitle.IndexOf(str2) + index1;
+
+
+
+            //Console.WriteLine(htmlTitle + index1 + "   " + index2);
+            //Console.Read();
+
+            result = htmlTitle.Substring(index1, index2 - index1);
+
+            Console.Clear();
+            Console.WriteLine(result);
+            //result = htmlTitle.Substring(index2, );
+
+
+
+            if (result == null)
+            {
+                result = "";
+            }
+
+            Console.WriteLine(result);
+
+            return result;
+        }
+
 
 
         static public string[] correctionData(string[] data,string day)
